@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
+import { Req, Res, Next } from "../libs/types/index";
 
-export function ping(req: Request, res: Response, next: NextFunction) {
+export function ping(req: Req, res: Res, next: Next) {
   res.end("Pong! Server is alive");
 }

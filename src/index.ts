@@ -2,8 +2,8 @@ import express from "express";
 import fs from "fs";
 import cors from "cors";
 import path from "path";
-import { AppContainer } from "./containers/app.container";
-import { Container } from "./containers/container";
+import { AppContainer } from "./libs/containers/app.container";
+import { Container } from "./libs/containers/container";
 
 /**
  *
@@ -17,14 +17,15 @@ import { Container } from "./containers/container";
  *  }
  * }
  *
- *
- *
  */
 
 class Nesv {
   private app: express.Application;
 
-  constructor(private readonly port: number = 3000) {
+  constructor(
+    private readonly port: number = 3000,
+    private middlewares = new Map<string, any>()
+  ) {
     this.app = express();
     this.app.use(express.json());
     this.app.use(cors());
@@ -40,7 +41,6 @@ class Nesv {
     const filePaths: string[] = [];
 
     const entries = fs.readdirSync(currentPath);
-
     for (const entry of entries) {
       const entryPath = path.join(currentPath, entry);
       const stat = fs.statSync(entryPath);
@@ -57,8 +57,7 @@ class Nesv {
   }
 
   private async registerControllers(directory: string = "./src/controllers") {
-    const allFilePaths = this.traverseDirectory(directory);
-
+    let allFilePaths = this.traverseDirectory(directory);
     for (let controllerPath of allFilePaths) {
       const mod = await import(
         path.join(import.meta.url, "../../", controllerPath)
@@ -79,6 +78,7 @@ class Nesv {
   }
 
   private async setupRoutes() {
+    console.log(new Date().toLocaleTimeString());
     for (let [
       controllerName,
       controllerContainer,
